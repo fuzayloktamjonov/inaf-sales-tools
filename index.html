@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Creators 5.0 — Daromad Kalkulatori</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c28;
+    --border: #2a2a3d;
+    --accent: #6c63ff;
+    --accent2: #a78bfa;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --text: #f0f0ff;
+    --muted: #8888aa;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+    padding-top: 16px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: clamp(22px, 5vw, 36px);
+    font-weight: 700;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    max-width: 900px;
+    margin: 0 auto 20px;
+  }
+
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .card-full {
+    grid-column: 1 / -1;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* INPUT */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .slider-row input[type=range] {
+    flex: 1;
+    padding: 0;
+    height: 4px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .slider-val {
+    min-width: 52px;
+    text-align: right;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent2);
+  }
+
+  /* TARIF TANLASH */
+  .tarif-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .tarif-btn {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .tarif-btn:hover { border-color: var(--accent); }
+  .tarif-btn.active {
+    border-color: var(--accent);
+    background: rgba(108, 99, 255, 0.12);
+  }
+  .tarif-btn .name {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .tarif-btn .price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .tarif-btn .usd {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* KOMISSIYA BOSQICHLARI */
+  .tiers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tier {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    transition: all 0.3s;
+  }
+  .tier.active-tier {
+    border-color: var(--green);
+    background: rgba(34, 197, 94, 0.08);
+  }
+  .tier .range { color: var(--muted); }
+  .tier .pct { font-weight: 700; color: var(--accent2); }
+  .tier.active-tier .pct { color: var(--green); }
+  .tier .arrow { font-size: 11px; color: var(--muted); }
+  .tier.active-tier .arrow { color: var(--green); }
+
+  /* NATIJA KARTALAR */
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 480px) {
+    .result-grid { grid-template-columns: 1fr; }
+  }
+
+  .res-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .res-card .label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .res-card .value {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .res-card .sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .big-result {
+    background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(167,139,250,0.08));
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .big-result .label {
+    font-size: 12px;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .big-result .amount {
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .big-result .amount-usd {
+    font-size: 16px;
+    color: var(--accent2);
+    margin-top: 4px;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    margin-top: 12px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+  }
+
+  /* MENEJER HISSASI */
+  .manager-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .manager-table th {
+    text-align: left;
+    padding: 8px 10px;
+    color: var(--muted);
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .manager-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(42,42,61,0.6);
+    color: var(--text);
+  }
+  .manager-table tr:last-child td { border-bottom: none; }
+  .manager-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .tag-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tag-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .tag-red { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">Inaf Sales · Ichki vosita</div>
+  <h1>AI Creators 5.0<br>Daromad Kalkulatori</h1>
+  <p class="subtitle">Zapusk natijasini real vaqtda hisoblang</p>
+</div>
+
+<div class="grid" style="max-width:900px;margin:0 auto 20px;">
+
+  <!-- SOZLAMALAR -->
+  <div class="card">
+    <div class="card-title">📊 Sotuv parametrlari</div>
+
+    <div class="field">
+      <label>Jami lead soni</label>
+      <div class="slider-row">
+        <input type="range" id="leads" min="500" max="15000" step="100" value="6000" oninput="calc()">
+        <span class="slider-val" id="leads-val">6 000</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Konversiya (%)</label>
+      <div class="slider-row">
+        <input type="range" id="conv" min="1" max="30" step="0.5" value="10" oninput="calc()">
+        <span class="slider-val" id="conv-val">10%</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Menejerlar soni</label>
+      <div class="slider-row">
+        <input type="range" id="mgrs" min="1" max="20" step="1" value="8" oninput="calc()">
+        <span class="slider-val" id="mgrs-val">8</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="card-title">💰 Tarif tanlang</div>
+    <div class="tarif-grid">
+      <div class="tarif-btn active" id="btn-premium" onclick="setTarif('premium')">
+        <div class="name">Premium</div>
+        <div class="price">3 690 000</div>
+        <div class="usd">≈ $307</div>
+      </div>
+      <div class="tarif-btn" id="btn-vip" onclick="setTarif('vip')">
+        <div class="name">VIP</div>
+        <div class="price">4 890 000</div>
+        <div class="usd">≈ $407</div>
+      </div>
+      <div class="tarif-btn" id="btn-mix75" onclick="setTarif('mix75')">
+        <div class="name">Aralash 75/25</div>
+        <div class="price">~4 065 000</div>
+        <div class="usd">≈ $339</div>
+      </div>
+      <div class="tarif-btn" id="btn-custom" onclick="setTarif('custom')">
+        <div class="name">O'zim kiriting</div>
+        <div class="price" id="custom-display">—</div>
+        <div class="usd">so'm</div>
+      </div>
+    </div>
+    <div class="field" id="custom-field" style="display:none">
+      <label>O'rtacha chek (so'm)</label>
+      <input type="number" id="custom-price" value="4000000" oninput="calc()" min="0">
+    </div>
+  </div>
+
+  <!-- KOMISSIYA TIZIMI -->
+  <div class="card">
+    <div class="card-title">📈 Komissiya bosqichlari</div>
+    <div class="tiers" id="tiers">
+      <div class="tier" id="tier0">
+        <span class="range">$0 — $150 000</span>
+        <span class="pct">3%</span>
+        <span class="arrow" id="arr0">—</span>
+      </div>
+      <div class="tier" id="tier1">
+        <span class="range">$150 001 — $200 000</span>
+        <span class="pct">4%</span>
+        <span class="arrow" id="arr1">—</span>
+      </div>
+      <div class="tier" id="tier2">
+        <span class="range">$200 001+</span>
+        <span class="pct">5%</span>
+        <span class="arrow" id="arr2">—</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Hozirgi daraja</span>
+        <span id="progress-text">$0 / $150k</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <hr class="divider" style="margin-top:16px">
+    <div class="card-title">⚙️ Xarajatlar</div>
+    <div class="field">
+      <label>Oylik FIX xarajat ($)</label>
+      <input type="number" id="fix-cost" value="2000" oninput="calc()" min="0">
+    </div>
+    <div class="field">
+      <label>Zapusk davomiyligi (oy)</label>
+      <div class="slider-row">
+        <input type="range" id="months" min="1" max="6" step="1" value="2" oninput="calc()">
+        <span class="slider-val" id="months-val">2 oy</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASOSIY NATIJA -->
+  <div class="card card-full">
+    <div class="card-title">🎯 Hisob-kitob natijalari</div>
+
+    <div class="big-result">
+      <div class="label">Inaf Sales komissiyasi (sof)</div>
+      <div class="amount" id="net-commission">— so'm</div>
+      <div class="amount-usd" id="net-usd">— $</div>
+    </div>
+
+    <div class="result-grid">
+      <div class="res-card">
+        <div class="label">Jami sotuv</div>
+        <div class="value" id="res-sales">—</div>
+        <div class="sub" id="res-sales-sub">—</div>
+      </div>
+      <div class="res-card">
+        <div class="label">Gross daromad</div>
+        <div class="value" id="res-gross">—</div>
+        <div class="sub" id="res-gross-usd">—</div>
+      </div>
+      <div class="res-card">
+        <div class="label">Komissiya %</div>
+        <div class="value" id="res-pct">—</div>
+        <div class="sub" id="res-pct-sub">progressiv</div>
+      </div>
+      <div class="res-card">
+        <div class="label">Komissiya brutto</div>
+        <div class="value" id="res-comm-gross">—</div>
+        <div class="sub" id="res-comm-sub">—</div>
+      </div>
+      <div class="res-card">
+        <div class="label">FIX xarajat</div>
+        <div class="value" id="res-fix">—</div>
+        <div class="sub" id="res-fix-sub">—</div>
+      </div>
+      <div class="res-card">
+        <div class="label">Menejer boshiga lead</div>
+        <div class="value" id="res-lead-per">—</div>
+        <div class="sub">kuniga ~<span id="res-lead-day">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENEJER JADVALI -->
+  <div class="card card-full">
+    <div class="card-title">👥 Menejer bo'yicha ko'rsatkichlar</div>
+    <table class="manager-table">
+      <thead>
+        <tr>
+          <th>Menejer</th>
+          <th>Lead</th>
+          <th>Sotuv (reja)</th>
+          <th>Komissiya (2%)</th>
+          <th>Yuk darajasi</th>
+        </tr>
+      </thead>
+      <tbody id="mgr-table"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  Inaf Sales · AI Creators 5.0 Zapusk · 1 USD = 12 000 so'm
+</div>
+
+<script>
+const RATE = 12000;
+const TIERS = [
+  { max: 150000, pct: 0.03 },
+  { max: 200000, pct: 0.04 },
+  { max: Infinity, pct: 0.05 },
+];
+const PRICES = {
+  premium: 3690000,
+  vip: 4890000,
+  mix75: Math.round(3690000 * 0.75 + 4890000 * 0.25),
+};
+
+let currentTarif = 'premium';
+
+function setTarif(t) {
+  currentTarif = t;
+  ['premium','vip','mix75','custom'].forEach(x => {
+    document.getElementById('btn-'+x).classList.toggle('active', x === t);
+  });
+  document.getElementById('custom-field').style.display = t === 'custom' ? 'block' : 'none';
+  calc();
+}
+
+function getPrice() {
+  if (currentTarif === 'custom') {
+    return parseFloat(document.getElementById('custom-price').value) || 0;
+  }
+  const p = PRICES[currentTarif];
+  document.getElementById('custom-display').textContent = '—';
+  return p;
+}
+
+function progressiveComm(grossUSD) {
+  if (grossUSD <= 150000) return grossUSD * 0.03;
+  if (grossUSD <= 200000) return grossUSD * 0.04;
+  return grossUSD * 0.05;
+}
+
+function activeTier(grossUSD) {
+  if (grossUSD <= 150000) return 0;
+  if (grossUSD <= 200000) return 1;
+  return 2;
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ru-RU');
+}
+
+function calc() {
+  const leads = parseInt(document.getElementById('leads').value);
+  const conv = parseFloat(document.getElementById('conv').value);
+  const mgrs = parseInt(document.getElementById('mgrs').value);
+  const fixCostUSD = parseFloat(document.getElementById('fix-cost').value) || 0;
+  const months = parseInt(document.getElementById('months').value);
+
+  document.getElementById('leads-val').textContent = fmt(leads);
+  document.getElementById('conv-val').textContent = conv + '%';
+  document.getElementById('mgrs-val').textContent = mgrs;
+  document.getElementById('months-val').textContent = months + ' oy';
+
+  const price = getPrice();
+  const sales = Math.round(leads * (conv / 100));
+  const grossSOM = sales * price;
+  const grossUSD = grossSOM / RATE;
+  const commUSD = progressiveComm(grossUSD);
+  const commSOM = commUSD * RATE;
+  const fixTotalUSD = fixCostUSD * months;
+  const fixTotalSOM = fixTotalUSD * RATE;
+  const netSOM = commSOM - fixTotalSOM;
+  const netUSD = netSOM / RATE;
+  const tier = activeTier(grossUSD);
+
+  // Tier highlight
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('tier'+i).classList.toggle('active-tier', i === tier);
+    document.getElementById('arr'+i).textContent = i === tier ? '✓ Hozirgi' : '—';
+  }
+
+  // Progress bar
+  const tierMax = tier === 0 ? 150000 : tier === 1 ? 200000 : 300000;
+  const tierMin = tier === 0 ? 0 : tier === 1 ? 150000 : 200000;
+  const pct = Math.min(100, Math.round(((grossUSD - tierMin) / (tierMax - tierMin)) * 100));
+  document.getElementById('progress-fill').style.width = pct + '%';
+  const nextLabel = tier === 2 ? 'Maksimal daraja' : '$' + fmt(tierMax === 150000 ? 150000 : 200000);
+  document.getElementById('progress-text').textContent = '$' + fmt(grossUSD) + ' / ' + nextLabel;
+
+  // Big result
+  document.getElementById('net-commission').textContent = fmt(netSOM) + ' so\'m';
+  document.getElementById('net-usd').textContent = (netUSD >= 0 ? '+' : '') + fmt(netUSD) + ' $';
+  document.getElementById('net-usd').style.color = netUSD >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // Cards
+  document.getElementById('res-sales').textContent = fmt(sales) + ' ta';
+  document.getElementById('res-sales-sub').textContent = fmt(leads) + ' leaddan ' + conv + '%';
+  document.getElementById('res-gross').textContent = fmt(grossSOM) + ' so\'m';
+  document.getElementById('res-gross-usd').textContent = '≈ $' + fmt(grossUSD);
+  document.getElementById('res-pct').textContent = (tier === 0 ? 3 : tier === 1 ? 4 : 5) + '%';
+  document.getElementById('res-comm-gross').textContent = fmt(commSOM) + ' so\'m';
+  document.getElementById('res-comm-sub').textContent = '≈ $' + fmt(commUSD);
+  document.getElementById('res-fix').textContent = fmt(fixTotalSOM) + ' so\'m';
+  document.getElementById('res-fix-sub').textContent = '$' + fmt(fixCostUSD) + ' × ' + months + ' oy';
+  const leadPerMgr = mgrs > 0 ? Math.round(leads / mgrs) : 0;
+  const workDays = months * 22;
+  document.getElementById('res-lead-per').textContent = fmt(leadPerMgr) + ' ta';
+  document.getElementById('res-lead-day').textContent = fmt(Math.round(leadPerMgr / workDays));
+
+  // Manager table
+  const salesPerMgr = mgrs > 0 ? Math.round(sales / mgrs) : 0;
+  const mgrComm = salesPerMgr * price * 0.02;
+  let rows = '';
+  for (let i = 1; i <= mgrs; i++) {
+    const lpm = Math.round(leads / mgrs);
+    const spm = Math.round(sales / mgrs);
+    const load = Math.round((spm / lpm) * 100);
+    let tagClass = load >= 15 ? 'tag-green' : load >= 10 ? 'tag-yellow' : 'tag-red';
+    let tagLabel = load >= 15 ? 'Yuqori' : load >= 10 ? 'O\'rta' : 'Past';
+    rows += `<tr>
+      <td>Menejer ${i}</td>
+      <td>${fmt(lpm)}</td>
+      <td>${fmt(spm)} ta</td>
+      <td>${fmt(mgrComm)} so'm</td>
+      <td><span class="tag ${tagClass}">${tagLabel} (${load}%)</span></td>
+    </tr>`;
+  }
+  document.getElementById('mgr-table').innerHTML = rows;
+}
+
+calc();
+</script>
+</body>
+</html>
+HTMLEOF
